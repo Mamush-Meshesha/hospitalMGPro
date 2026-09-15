@@ -50,8 +50,8 @@ export const create = async (req: Request, res: Response) => {
 
 export const getAll = async (req: Request, res: Response) => {
   try {
-    const providerId = req.user?.providerId;
-    const patients = await PatientDAL.getAllPatients(providerId);
+    // Fetch all active patients (global patient index)
+    const patients = await PatientDAL.getAllPatients();
     res.status(200).json({ results: patients });
   } catch (error: any) {
     console.error("Patient Fetch Error:", error);
