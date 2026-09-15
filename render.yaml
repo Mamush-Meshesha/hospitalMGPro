@@ -16,6 +16,13 @@ services:
         sync: false # You must set this in the Render dashboard!
       - key: JWT_SECRET
         generateValue: true
+      - key: COMMUNICATION_PROTOCOL
+        value: REST
+      - key: ERP_REST_SERVER
+        fromService:
+          type: web
+          name: hospital-erp-backend
+          envVarKey: RENDER_INTERNAL_URL
 
   # 2. ERP Backend (Microservice)
   - type: web
