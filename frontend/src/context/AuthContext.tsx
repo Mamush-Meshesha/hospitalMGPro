@@ -145,16 +145,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     if (user?.tenantId) {
       try {
+        const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
         let response;
         if (isActive) {
           // Deactivate
-          response = await fetch(`/api/v1/tenants/${user.tenantId}/subscriptions/${module}`, {
+          response = await fetch(`${baseUrl}/tenants/${user.tenantId}/subscriptions/${module}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
           });
         } else {
           // Activate
-          response = await fetch(`/api/v1/tenants/${user.tenantId}/subscriptions`, {
+          response = await fetch(`${baseUrl}/tenants/${user.tenantId}/subscriptions`, {
             method: 'POST',
             headers: { 
               'Authorization': `Bearer ${token}`,

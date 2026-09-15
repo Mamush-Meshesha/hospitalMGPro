@@ -14,7 +14,8 @@ export const fetchApi = async (endpoint: string, options: RequestInit = {}) => {
   }
 
 
-  const response = await fetch(`/api/v1${endpoint}`, {
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1';
+  const response = await fetch(`${baseUrl}${endpoint}`, {
     ...options,
     headers,
     cache: 'no-cache', // Force bypass browser caching
