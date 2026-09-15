@@ -12,6 +12,7 @@ interface RadOrder {
   status: 'Scheduled' | 'Images Available' | 'Pending Reading' | 'Completed';
   time: string;
   urgent: boolean;
+  imageUrl?: string;
 }
 
 const initialOrders: RadOrder[] = [

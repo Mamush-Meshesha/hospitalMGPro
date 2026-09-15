@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Calendar as CalendarIcon, Printer, Search, User, Clock, MapPin, Activity } from 'lucide-react';
+import { Calendar as CalendarIcon, Printer, Search, User, Clock, MapPin, Activity, FileText } from 'lucide-react';
 import { fetchApi } from '../utils/api';
 import { toast } from 'sonner';
 
@@ -134,7 +134,7 @@ export default function DutyRosterView() {
             </div>
           ) : (
             <div className="relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
-              {appointments.map((appt, i) => (
+              {appointments.map((appt) => (
                 <div key={appt.uuid} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
                   <div className="flex items-center justify-center w-10 h-10 rounded-full border border-background bg-primary/20 text-primary shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
                     <Activity size={16} />

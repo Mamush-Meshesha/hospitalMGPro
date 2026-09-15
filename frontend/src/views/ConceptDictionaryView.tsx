@@ -130,7 +130,7 @@ export default function ConceptDictionaryView() {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = async (id: number) => {
     if (!confirm('Are you sure you want to retire this concept?')) return;
     try {
       await fetchApi(`/concept/${id}`, { method: 'DELETE' });
@@ -449,7 +449,7 @@ export default function ConceptDictionaryView() {
                         <button onClick={() => openEdit(row)} className="text-muted-foreground hover:text-primary transition-colors p-1.5 rounded-md hover:bg-primary/10" title="Edit">
                           <Edit size={16} />
                         </button>
-                        <button onClick={() => handleDelete(row.uuid)} className="text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-destructive/10" title="Delete">
+                        <button onClick={() => handleDelete(row.concept_id)} className="text-muted-foreground hover:text-destructive transition-colors p-1.5 rounded-md hover:bg-destructive/10" title="Delete">
                           <Trash2 size={16} />
                         </button>
                       </td>

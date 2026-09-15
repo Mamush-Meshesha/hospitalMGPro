@@ -240,11 +240,11 @@ function LabDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50 text-foreground text-xs">
-                {stats.recent.length === 0 ? (
+                {(data.recent || []).length === 0 ? (
                   <tr>
                     <td colSpan={4} className="text-center py-8 text-muted-foreground">No recent lab orders found.</td>
                   </tr>
-                ) : stats.recent.map((row, i) => (
+                ) : (data.recent || []).map((row: any, i: any) => (
                   <tr key={i} onClick={() => navigate(`/lab/${row.uuid}`)} className="hover:bg-muted/50 transition-colors cursor-pointer group">
                     <td className="px-5 py-3 font-medium text-primary">
                       <div className="flex items-center gap-2 group-hover:underline">
@@ -887,8 +887,8 @@ export default function DashboardView() {
   const { user } = useAuth();
   
   // High-level role checks
-  const isSystemAdmin = user?.privileges.includes('VIEW_SYSTEM_CONFIG');
-  const isPharmacyAdmin = user?.privileges.includes('VIEW_PHARMACY') && user?.privileges.includes('MANAGE_PURCHASE_ORDERS');
+  const isSystemAdmin = user?.privileges?.includes('VIEW_SYSTEM_CONFIG');
+  const isPharmacyAdmin = user?.privileges?.includes('VIEW_PHARMACY') && user?.privileges?.includes('MANAGE_PURCHASE_ORDERS');
   
   if (isSystemAdmin || isPharmacyAdmin) {
     // Pharmacy Admin has cross-domain access (Pharmacy + Supply Chain), so they get the overarching Admin Dashboard
@@ -896,32 +896,32 @@ export default function DashboardView() {
   }
 
   // Clinical user (Nurse/Doctor)
-  if (user?.privileges.includes('VIEW_OBS') && !user?.privileges.includes('MANAGE_LAB')) {
+  if (user?.privileges?.includes('VIEW_OBS') && !user?.privileges?.includes('MANAGE_LAB')) {
     return <NurseDashboard />;
   }
 
   // Front Desk user (Clerk/Receptionist)
-  if (user?.privileges.includes('VIEW_QUEUES') && user?.privileges.includes('MANAGE_BILLING')) {
+  if (user?.privileges?.includes('VIEW_QUEUES') && user?.privileges?.includes('MANAGE_BILLING')) {
     return <FrontDeskDashboard />;
   }
   
   // Dedicated Lab Tech
-  if (user?.privileges.includes('MANAGE_LAB')) {
+  if (user?.privileges?.includes('MANAGE_LAB')) {
     return <LabDashboard />;
   }
   
   // Dedicated Pharmacist
-  if (user?.privileges.includes('VIEW_PHARMACY')) {
+  if (user?.privileges?.includes('VIEW_PHARMACY')) {
     return <PharmacyDashboard />;
   }
 
   // Dedicated Storekeeper
-  if (user?.privileges.includes('RECEIVE_STOCK')) {
+  if (user?.privileges?.includes('RECEIVE_STOCK')) {
     return <StorekeeperDashboard />;
   }
 
   // Dedicated Procurement Officer
-  if (user?.privileges.includes('MANAGE_PURCHASE_ORDERS')) {
+  if (user?.privileges?.includes('MANAGE_PURCHASE_ORDERS')) {
     return <ProcurementDashboard />;
   }
   

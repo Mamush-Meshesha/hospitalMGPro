@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-// Create a configured axios instance
-export const api = axios.create({
+export const api: any = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api/v1',
   headers: {
     'Content-Type': 'application/json'
@@ -10,7 +9,7 @@ export const api = axios.create({
 
 // Request interceptor
 api.interceptors.request.use(
-  (config) => {
+  (config: any) => {
     // Attach tokens here if needed
     const token = sessionStorage.getItem('token');
     if (token) {
@@ -24,15 +23,15 @@ api.interceptors.request.use(
 
     return config;
   },
-  (error) => {
+  (error: any) => {
     return Promise.reject(error);
   }
 );
 
 // Response interceptor
 api.interceptors.response.use(
-  (response) => response.data,
-  (error) => {
+  (response: any) => response.data,
+  (error: any) => {
     console.error('API Error:', error.response?.data || error.message);
     return Promise.reject(error);
   }

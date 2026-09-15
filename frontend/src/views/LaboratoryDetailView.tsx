@@ -90,7 +90,7 @@ export default function LaboratoryDetailView() {
             <div className="flex items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-foreground font-mono">{order.order_number || 'Lab Order'}</h1>
               <StatusBadge label={status} variant={getStatusVariant(status)} />
-              {urgency === 'STAT' && <StatusBadge label="STAT" variant="error" />}
+              {urgency === 'STAT' && <StatusBadge label="STAT" variant="destructive" />}
             </div>
             <p className="text-sm font-medium text-muted-foreground mt-1">{testName}</p>
           </div>
