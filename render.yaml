@@ -1,0 +1,49 @@
+services:
+  # 1. Main Hospital Backend
+  - type: web
+    name: hospital-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false # You must set this in the Render dashboard!
+      - key: JWT_SECRET
+        generateValue: true
+
+  # 2. ERP Backend (Microservice)
+  - type: web
+    name: hospital-erp-backend
+    env: node
+    rootDir: erp-backend
+    buildCommand: npm install && npx prisma generate && npm run build
+    startCommand: npm start
+    plan: free
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: DATABASE_URL
+        sync: false # You must set this in the Render dashboard!
+
+  # 3. Frontend (React/Vite)
+  - type: web
+    name: hospital-frontend
+    env: static
+    rootDir: frontend
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    plan: free
+    envVars:
+      - key: VITE_API_URL
+        fromService:
+          type: web
+          name: hospital-backend
+          envVarKey: RENDER_EXTERNAL_URL
