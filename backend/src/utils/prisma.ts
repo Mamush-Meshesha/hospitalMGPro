@@ -26,8 +26,8 @@ export const prisma = basePrisma.$extends({
            } else if (operation === 'create' || operation === 'createMany') {
              args.data = { ...args.data, tenant_id: context.tenantId };
            } else if (operation === 'upsert') {
-             args.where = { ...args.where, tenant_id: context.tenantId };
-             args.create = { ...args.create, tenant_id: context.tenantId };
+             args.where = { ...(args.where as any), tenant_id: context.tenantId };
+             args.create = { ...(args.create as any), tenant_id: context.tenantId };
            }
            
            // Defense-in-Depth: Use PostgreSQL Row-Level Security!
