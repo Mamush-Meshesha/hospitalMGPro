@@ -1,0 +1,26 @@
+import { prisma } from '../utils/prisma';
+
+export class ConceptreferencetermmapDAL {
+  static async getAll() {
+    return await prisma.concept_reference_term_map.findMany({ take: 50 });
+  }
+
+  static async getById(id: string) {
+    return await prisma.concept_reference_term_map.findFirst({ where: { uuid: id } });
+  }
+
+  static async create(data: any) {
+    // Note: UUID resolution logic for nested entities (like patient_uuid -> patient_id) 
+    // will be injected at the service level. This handles raw inserts.
+    return await prisma.concept_reference_term_map.create({ data });
+  }
+
+  static async update(id: string, data: any) {
+    return await prisma.concept_reference_term_map.updateMany({ where: { uuid: id }, data });
+  }
+
+  static async remove(id: string) {
+    // Hard Delete
+    return await prisma.concept_reference_term_map.deleteMany({ where: { uuid: id } });
+  }
+}

@@ -1,0 +1,17 @@
+◇ injected env (6) from .env // tip: ⌘ enable debugging { debug: true }
+◇ injected env (0) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+📡 Initializing CommunicationServer with protocol: ALL
+🚀 gRPC Server running on port 50051
+(node:198619) DeprecationWarning: Calling start() is no longer necessary. It can be safely omitted.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+🚀 Kafka Consumer connected to localhost:9092
+{"level":"INFO","timestamp":"2026-09-11T05:37:41.126Z","logger":"kafkajs","message":"[Consumer] Starting","groupId":"erp-group"}
+{"level":"INFO","timestamp":"2026-09-11T05:37:44.176Z","logger":"kafkajs","message":"[ConsumerGroup] Consumer has joined the group","groupId":"erp-group","memberId":"erp-backend-e86df03f-a8c6-4a98-bf49-95b1926bfe8c","leaderId":"erp-backend-e86df03f-a8c6-4a98-bf49-95b1926bfe8c","isLeader":true,"memberAssignment":{"emr.pharmacy.events":[0]},"groupProtocol":"RoundRobinAssigner","duration":3047}
+📦 ERP Backend running on port 4000
+[Kafka] Received DRUG_DISPENSED event for concept 9999
+[Kafka] Stock dispatched successfully
+[Kafka] Received DRUG_DISPENSED event for concept 9999
+[Kafka] Stock dispatched successfully
+[gRPC] Dispatching stock for concept 9999
+[Kafka] Received DRUG_DISPENSED event for concept 9999
+[Kafka] Stock dispatched successfully

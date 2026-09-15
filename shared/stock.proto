@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package stock;
+
+service StockService {
+  rpc DispatchStock (DispatchRequest) returns (DispatchResponse) {}
+  rpc CheckAvailability (AvailabilityRequest) returns (AvailabilityResponse) {}
+}
+
+message DispatchRequest {
+  int32 conceptId = 1;
+  double quantity = 2;
+  int32 locationId = 3;
+}
+
+message DispatchResponse {
+  string status = 1;
+  int32 conceptId = 2;
+  double quantity = 3;
+}
+
+message AvailabilityRequest {
+  int32 conceptId = 1;
+}
+
+message AvailabilityResponse {
+  int32 productId = 1;
+  double available = 2;
+}

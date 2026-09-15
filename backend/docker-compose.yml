@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: .
+      target: builder
+      network: host
+    container_name: hospital-backend
+    command: sh -c "npm install && npx prisma db push --accept-data-loss && npx prisma db seed && npm run dev"
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/hospital_db?schema=public
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - db
+    volumes:
+      - ./src:/app/src
+      - ./dist:/app/dist
+      - ./prisma:/app/prisma
+      - ./.env:/app/.env
+      - ../shared:/app/shared
+
+  erp-backend:
+    build:
+      context: ../erp-backend
+      dockerfile: Dockerfile
+      target: builder
+      network: host
+    container_name: hospital-erp-backend
+    command: sh -c "npm install && npx prisma db push --accept-data-loss && npm run dev"
+    ports:
+      - "4000:4000"
+      - "50051:50051"
+    environment:
+      - NODE_ENV=development
+      - PORT=4000
+      - DATABASE_URL=postgresql://postgres:password@db:5432/erp_db?schema=public
+      - JWT_SECRET=super-secret-hospital-key-change-me
+      - KAFKA_BROKER=kafka:9092
+    depends_on:
+      - db
+    volumes:
+      - ../erp-backend/src:/app/src
+      - ../erp-backend/dist:/app/dist
+      - ../erp-backend/prisma:/app/prisma
+      - ../shared:/app/shared
+
+  db:
+    image: postgres:15-alpine
+    container_name: hospital-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=hospital_db
+    ports:
+      - "5440:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.4.0
+    container_name: hospital-zookeeper
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka:
+    image: confluentinc/cp-kafka:7.4.0
+    container_name: hospital-kafka
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+      - "29092:29092"
+    environment:
+      KAFKA_BROKER_ID: 2
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_LISTENERS: INTERNAL://0.0.0.0:9092,EXTERNAL://0.0.0.0:29092
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+
+
+volumes:
+  postgres_data:
