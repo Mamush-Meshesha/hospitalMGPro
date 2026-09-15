@@ -2,3 +2,4 @@ node_modules
 .env
 **/fix-*.ts
 **/parse-*.js
+.agent/
