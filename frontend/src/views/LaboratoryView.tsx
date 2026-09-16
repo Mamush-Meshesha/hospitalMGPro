@@ -290,7 +290,7 @@ export default function LaboratoryView() {
                       <td className="px-5 py-4 text-right">
                         {row.status === 'pending' && (
                           <button 
-                            onClick={() => handleStartProcessing(row.id)}
+                            onClick={(e) => { e.stopPropagation(); handleStartProcessing(row.id); }}
                             className="px-3 py-1.5 bg-muted text-foreground border border-border rounded text-xs font-medium hover:bg-muted/80 transition-colors shadow-sm flex items-center gap-1.5 ml-auto"
                           >
                             <Play size={12} /> Start Processing
@@ -298,7 +298,7 @@ export default function LaboratoryView() {
                         )}
                         {row.status === 'processing' && (
                           <button 
-                            onClick={() => setSelectedLabId(row.id)}
+                            onClick={(e) => { e.stopPropagation(); setSelectedLabId(row.id); }}
                             className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-xs font-medium hover:bg-primary/90 transition-colors shadow-sm ml-auto"
                           >
                             Enter Results

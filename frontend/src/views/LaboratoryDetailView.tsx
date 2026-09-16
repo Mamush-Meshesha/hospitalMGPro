@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Clock, User, FileText, Printer, CheckCircle, Activity, Loader2, Beaker, UserCog } from 'lucide-react';
+import { ArrowLeft, Clock, User, FileText, Printer, CheckCircle, Activity, Loader2, Beaker, UserCog, Play, TestTube, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { toast } from 'sonner';
 import { StatusBadge } from '../components/ui/StatusBadge';
 import { fetchApi } from '../utils/api';
 import { printDocument } from '../utils/print';
@@ -26,6 +28,51 @@ export default function LaboratoryDetailView() {
   useEffect(() => {
     if (id) loadOrder();
   }, [id]);
+
+  // Enter Results Form (obs)
+  const [isEnterResultsOpen, setIsEnterResultsOpen] = useState(false);
+  const [obsNumeric1, setObsNumeric1] = useState('');
+  const [obsNumeric2, setObsNumeric2] = useState('');
+  const [obsComments, setObsComments] = useState('');
+  const [markAbnormal, setMarkAbnormal] = useState(false);
+
+  const handleStartProcessing = async () => {
+    try {
+      await fetchApi(`/order/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ fulfiller_status: 'PROCESSING' })
+      });
+      toast.success('Specimen processing started');
+      loadOrder(); // Reload the order data
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to start processing');
+    }
+  };
+
+  const handleSubmitResults = async () => {
+    const payload = {
+      resultValue: obsNumeric1,
+      comments: obsComments,
+      abnormal: markAbnormal
+    };
+
+    try {
+      const data = await fetchApi(`/order/${id}/lab-result`, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+      
+      if (data) {
+        setIsEnterResultsOpen(false);
+        setObsNumeric1(''); setObsNumeric2(''); setObsComments(''); setMarkAbnormal(false);
+        toast.success('Lab results submitted successfully');
+        loadOrder(); // Reload the order data to show completed status and results
+      }
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to submit lab results');
+      console.error(err);
+    }
+  };
 
   const getStatusVariant = (status: string) => {
     const s = (status || 'pending').toUpperCase();
@@ -228,10 +275,10 @@ export default function LaboratoryDetailView() {
                   </div>
                   <h3 className="text-xl font-medium text-foreground">Specimen in Processing</h3>
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
-                    This specimen is currently being processed by the laboratory. Go to the Laboratory Hub to enter the final results.
+                    This specimen is currently being processed by the laboratory. Enter the final results when ready.
                   </p>
-                  <button onClick={() => navigate('/lab')} className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors">
-                    Go to Lab Hub
+                  <button onClick={() => setIsEnterResultsOpen(true)} className="mt-4 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors flex items-center gap-2">
+                    <TestTube size={16} /> Enter Results
                   </button>
                 </div>
               ) : (
@@ -243,6 +290,9 @@ export default function LaboratoryDetailView() {
                   <p className="text-sm text-muted-foreground max-w-md mx-auto">
                     This specimen has not yet been processed. It is pending in the laboratory queue.
                   </p>
+                  <button onClick={handleStartProcessing} className="mt-4 px-4 py-2 bg-muted text-foreground border border-border rounded-md text-sm font-medium hover:bg-muted/80 transition-colors flex items-center gap-2">
+                    <Play size={16} /> Start Processing
+                  </button>
                 </div>
               )}
             </div>
@@ -250,6 +300,96 @@ export default function LaboratoryDetailView() {
         </div>
 
       </div>
+
+      {/* Enter Results Modal */}
+      <AnimatePresence>
+        {isEnterResultsOpen && (
+          <>
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsEnterResultsOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 20 }}
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg bg-card border border-border shadow-2xl rounded-xl z-50 flex flex-col overflow-hidden"
+            >
+              <div className="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+                <h2 className="font-semibold text-lg text-foreground flex items-center gap-2">
+                  <TestTube size={20} className="text-primary"/> Enter Lab Results
+                </h2>
+                <button 
+                  onClick={() => setIsEnterResultsOpen(false)}
+                  className="p-1.5 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div className="p-3 bg-muted/30 rounded-lg border border-border flex justify-between items-center">
+                  <div>
+                    <div className="text-sm font-semibold text-foreground">{testName}</div>
+                    <div className="text-xs text-muted-foreground">Accession {order.order_number} • {patientName}</div>
+                  </div>
+                  {urgency === 'STAT' && (
+                    <div className="px-2 py-1 bg-destructive/10 text-destructive text-[10px] font-bold rounded uppercase">STAT</div>
+                  )}
+                </div>
+
+                <div className="text-xs font-semibold text-primary uppercase tracking-wider mb-2 mt-4">Mapped to obs table</div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-foreground flex items-center justify-between">
+                      Numeric Value 1 <span className="text-[9px] text-muted-foreground font-normal">obs.value_numeric</span>
+                    </label>
+                    <input type="number" value={obsNumeric1} onChange={e => setObsNumeric1(e.target.value)} className="w-full px-3 py-2 bg-muted/50 border border-border rounded-md text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="e.g. 14.5" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-foreground flex items-center justify-between">
+                      Numeric Value 2 <span className="text-[9px] text-muted-foreground font-normal">obs.value_numeric</span>
+                    </label>
+                    <input type="number" value={obsNumeric2} onChange={e => setObsNumeric2(e.target.value)} className="w-full px-3 py-2 bg-muted/50 border border-border rounded-md text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all" placeholder="e.g. 4.2" />
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-foreground flex items-center justify-between">
+                    Pathologist Notes <span className="text-[9px] text-muted-foreground font-normal">obs.comments / value_text</span>
+                  </label>
+                  <textarea value={obsComments} onChange={e => setObsComments(e.target.value)} className="w-full px-3 py-2 bg-muted/50 border border-border rounded-md text-sm focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all h-20 resize-none" placeholder="Add interpretation or observations..." />
+                </div>
+                
+                <div className="flex items-center gap-2 mt-2">
+                  <input type="checkbox" id="markAbnormal" checked={markAbnormal} onChange={e => setMarkAbnormal(e.target.checked)} className="rounded border-border text-primary focus:ring-primary" />
+                  <label htmlFor="markAbnormal" className="text-xs font-medium text-destructive">Flag as Abnormal/Critical</label>
+                </div>
+              </div>
+
+              <div className="px-6 py-4 border-t border-border bg-muted/30 flex justify-end gap-3">
+                <button 
+                  onClick={() => setIsEnterResultsOpen(false)}
+                  className="px-4 py-2 bg-card border border-border text-foreground rounded-md text-sm font-medium hover:bg-muted transition-colors"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSubmitResults}
+                  disabled={!obsNumeric1 && !obsComments}
+                  className="px-6 py-2 bg-primary text-primary-foreground rounded-md text-sm font-medium hover:bg-primary/90 transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save Results
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
