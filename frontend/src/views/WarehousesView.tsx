@@ -15,6 +15,7 @@ export default function WarehousesView() {
   
   // Modal States
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isAddBranchModalOpen, setIsAddBranchModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   // Selected Item
@@ -62,6 +63,18 @@ export default function WarehousesView() {
       loadData();
     } catch (error) {
       console.error('Save failed', error);
+    }
+  };
+
+  const handleSaveBranch = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    try {
+      await warehousesApi.createBranch({ name: formData.get('name') });
+      setIsAddBranchModalOpen(false);
+      loadData();
+    } catch (error) {
+      console.error('Save branch failed', error);
     }
   };
 
@@ -210,12 +223,20 @@ export default function WarehousesView() {
           onSearchChange={setSearchTerm}
           onRowClick={(item) => handleOpenView(item)}
           actions={
-            <button 
-              onClick={handleOpenAdd}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
-            >
-              <Plus size={14} /> Add Location
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => setIsAddBranchModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-muted text-foreground border border-border rounded-md text-xs font-medium hover:bg-accent transition-colors"
+              >
+                <Plus size={14} /> Add Branch
+              </button>
+              <button 
+                onClick={handleOpenAdd}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-xs font-medium hover:bg-primary/90 transition-colors"
+              >
+                <Plus size={14} /> Add Location
+              </button>
+            </div>
           }
         />
       )}
@@ -246,6 +267,39 @@ export default function WarehousesView() {
         }
       >
         {AddEditForm}
+      </Modal>
+
+      {/* Add Branch Modal */}
+      <Modal
+        isOpen={isAddBranchModalOpen}
+        onClose={() => setIsAddBranchModalOpen(false)}
+        title="Add New Branch"
+        maxWidth="sm"
+        footer={
+          <>
+            <button 
+              type="button"
+              onClick={() => setIsAddBranchModalOpen(false)}
+              className="px-3 py-1.5 bg-transparent text-muted-foreground hover:bg-muted rounded-md text-sm font-medium transition-colors"
+            >
+              Cancel
+            </button>
+            <button 
+              type="submit"
+              form="branchForm"
+              className="px-3 py-1.5 bg-primary text-primary-foreground rounded-md text-sm font-medium transition-colors"
+            >
+              Save Branch
+            </button>
+          </>
+        }
+      >
+        <form id="branchForm" onSubmit={handleSaveBranch} className="space-y-4">
+          <div>
+            <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Branch Name</label>
+            <input name="name" required type="text" className="w-full px-3 py-2 bg-background border border-border rounded-md text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20" placeholder="e.g. Main Hospital, Outpatient Clinic" />
+          </div>
+        </form>
       </Modal>
 
       {/* Delete Confirmation Modal */}
