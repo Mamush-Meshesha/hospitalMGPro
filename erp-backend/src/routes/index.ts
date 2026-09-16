@@ -9,6 +9,7 @@ import warehouseRoutes from './warehouse.routes';
 import inventoryRoutes from './inventory.routes';
 import invoiceRoutes from './invoice.routes';
 import stockMovementRoutes from './stockMovement.routes';
+import uomRoutes from './uom.routes';
 
 const router = Router();
 
@@ -21,5 +22,6 @@ router.use('/warehouses', warehouseRoutes);
 router.use('/inventory', inventoryRoutes);
 router.use('/invoices', invoiceRoutes);
 router.use('/movements', stockMovementRoutes);
+router.use('/uom', uomRoutes);
 
 export default router;

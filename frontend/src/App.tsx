@@ -17,6 +17,7 @@ import QueuesHubView from './views/QueuesHubView';
 import QueueDetailView from './views/QueueDetailView';
 import ReportsView from './views/ReportsView';
 import ProductMasterView from './views/ProductMasterView';
+import UomMasterView from './views/UomMasterView';
 import ProductDetailView from './views/ProductDetailView';
 import PurchaseOrdersView from './views/PurchaseOrdersView';
 import PurchaseOrderDetailView from './views/PurchaseOrderDetailView';
@@ -127,6 +128,7 @@ function App() {
             <Route path="inventory" element={<ProtectedRoute requiredPrivileges={['VIEW_INVENTORY']}><InventoryView /></ProtectedRoute>} />
             <Route path="inventory/:id" element={<ProtectedRoute requiredPrivileges={['VIEW_INVENTORY']}><InventoryBatchDetailView /></ProtectedRoute>} />
             <Route path="products" element={<ProtectedRoute requiredPrivileges={['MANAGE_PRODUCT_MASTER']}><ProductMasterView /></ProtectedRoute>} />
+            <Route path="uom" element={<ProtectedRoute requiredPrivileges={['MANAGE_PRODUCT_MASTER']}><UomMasterView /></ProtectedRoute>} />
             <Route path="products/:id" element={<ProtectedRoute requiredPrivileges={['MANAGE_PRODUCT_MASTER']}><ProductDetailView /></ProtectedRoute>} />
             <Route path="po" element={<ProtectedRoute requiredPrivileges={['MANAGE_PURCHASE_ORDERS']}><PurchaseOrdersView /></ProtectedRoute>} />
             <Route path="po/:id" element={<ProtectedRoute requiredPrivileges={['MANAGE_PURCHASE_ORDERS']}><PurchaseOrderDetailView /></ProtectedRoute>} />

@@ -43,6 +43,7 @@ const erpRoutePrefixes = [
   '/api/v1/invoices', 
   '/api/v1/movements', 
   '/api/v1/stock',
+  '/api/v1/uom',
   '/erp-health'
 ];
 

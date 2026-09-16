@@ -6,10 +6,12 @@ import { StatusBadge } from '../components/ui/StatusBadge';
 import { Modal } from '../components/ui/Modal';
 import { ConfirmDialog } from '../components/ui/ConfirmDialog';
 import { productsApi } from '../api/products.api';
+import { uomApi } from '../api/uom.api';
 
 export default function ProductMasterView() {
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState<any[]>([]);
+  const [uoms, setUoms] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   
   // Modal States
@@ -26,8 +28,12 @@ export default function ProductMasterView() {
   const loadProducts = async () => {
     setIsLoading(true);
     try {
-      const data = await productsApi.getAll();
+      const [data, uomData] = await Promise.all([
+        productsApi.getAll(),
+        uomApi.getAll()
+      ]);
       setProducts(data);
+      setUoms(uomData);
     } catch (error) {
       console.error('Failed to load products', error);
     } finally {
@@ -180,7 +186,11 @@ export default function ProductMasterView() {
           <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Purchase UOM</label>
           <select name="purchase_uom_id" defaultValue={selectedProduct?.purchase_uom_id || ''} className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20">
             <option value="">Select UOM...</option>
-            {/* Options will be loaded from UOM API in future */}
+            {uoms.map((uom: any) => (
+              <option key={uom.uom_id} value={uom.uom_id}>
+                {uom.name} ({uom.category?.name})
+              </option>
+            ))}
           </select>
           <p className="text-[10px] text-muted-foreground mt-1">How you buy it from suppliers.</p>
         </div>
@@ -188,7 +198,11 @@ export default function ProductMasterView() {
           <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">Store (Base) UOM</label>
           <select name="store_uom_id" defaultValue={selectedProduct?.store_uom_id || ''} className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm outline-none focus:border-primary focus:ring-1 focus:ring-primary/20">
             <option value="">Select UOM...</option>
-             {/* Options will be loaded from UOM API in future */}
+            {uoms.filter((u: any) => u.type === 'REFERENCE').map((uom: any) => (
+              <option key={uom.uom_id} value={uom.uom_id}>
+                {uom.name} ({uom.category?.name})
+              </option>
+            ))}
           </select>
           <p className="text-[10px] text-muted-foreground mt-1">How you dispense it to patients.</p>
         </div>

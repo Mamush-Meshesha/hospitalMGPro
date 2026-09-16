@@ -6,7 +6,8 @@ import {
   Microscope, FileText, CreditCard, Shield, Database, StethoscopeIcon,
   ClipboardList, UserPlus, MapPin, FormInput, Network, Building2,
   Syringe, HeartPulse, LogOut, Package, Bed, PieChart, ShoppingCart, Barcode,
-  Truck, Map, ArrowLeftRight, Receipt, Layers, Calendar as CalendarIcon
+  Truck, Map, ArrowLeftRight, Receipt, Layers, Calendar as CalendarIcon,
+  TestTubes, TrendingUp, Scale
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '../context/ThemeContext';
@@ -200,6 +201,7 @@ export default function DashboardLayout() {
               {hasPrivilege('VIEW_PHARMACY') && <SidebarItem icon={Pill} label="Pharmacy Dispense" to="/pharmacy" isCollapsed={!isSidebarOpen} />}
               {hasPrivilege('VIEW_INVENTORY') && <SidebarItem icon={Package} label="Inventory Mgmt" to="/inventory" isCollapsed={!isSidebarOpen} />}
               {hasPrivilege('MANAGE_PRODUCT_MASTER') && <SidebarItem icon={Barcode} label="Product Master" to="/products" isCollapsed={!isSidebarOpen} />}
+              {hasPrivilege('MANAGE_PRODUCT_MASTER') && <SidebarItem icon={Scale} label="UOM Master" to="/uom" isCollapsed={!isSidebarOpen} />}
               {hasPrivilege('MANAGE_PRODUCT_MASTER') && <SidebarItem icon={Layers} label="Categories & UOMs" to="/categories" isCollapsed={!isSidebarOpen} />}
               {hasPrivilege('MANAGE_PURCHASE_ORDERS') && <SidebarItem icon={ShoppingCart} label="Purchase Orders" to="/po" isCollapsed={!isSidebarOpen} />}
               {hasPrivilege('MANAGE_SUPPLIERS') && <SidebarItem icon={Truck} label="Suppliers & Vendors" to="/suppliers" isCollapsed={!isSidebarOpen} />}
