@@ -6,7 +6,9 @@ import { CdsService } from '../services/cds.service';
 export const getAll = async (req: Request, res: Response) => {
   try {
     const personUuid = req.query.personUuid as string;
-    const results = await ObsService.getAll(personUuid);
+    const privileges = req.user?.privileges as string[] | undefined;
+    const authLocationId = req.locationId;
+    const results = await ObsService.getAll(personUuid, privileges, authLocationId);
     const v = req.query.v as string || 'default';
     res.status(200).json({ results: RepresentationEngine.format(results, v) });
   } catch (error: any) {

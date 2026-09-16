@@ -14,10 +14,22 @@ export interface CreateEncounterInput {
 }
 
 export class EncounterDAL {
-  static async getAll(date?: string, locationId?: number, providerId?: number) {
+  static async getAll(date?: string, queryLocationId?: number, providerId?: number, privileges?: string[], authLocationId?: number) {
     const where: any = { voided: false };
-    if (locationId) {
-      where.location_id = locationId;
+    
+    // Apply authorization location filter
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && authLocationId) {
+        where.location_id = authLocationId;
+      }
+    } else if (authLocationId) {
+      where.location_id = authLocationId;
+    }
+
+    // Explicit query filter
+    if (queryLocationId) {
+      where.location_id = queryLocationId;
     }
     if (providerId) {
       where.reverse_encounter_provider_encounter_id_fk = {
@@ -138,11 +150,23 @@ export class EncounterDAL {
     });
   }
 
-  static async getByPatient(patientUuid: string) {
+  static async getByPatient(patientUuid: string, privileges?: string[], authLocationId?: number) {
     const person = await prisma.person.findFirst({ where: { uuid: patientUuid } });
     if (!person) return [];
+
+    const where: any = { patient_id: person.person_id, voided: false };
+    
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && authLocationId) {
+        where.location_id = authLocationId;
+      }
+    } else if (authLocationId) {
+      where.location_id = authLocationId;
+    }
+
     return await prisma.encounter.findMany({
-      where: { patient_id: person.person_id, voided: false },
+      where,
       include: { encounter_type_encounter_type_id: true, location_encounter_location: true },
       orderBy: { encounter_datetime: 'desc' }
     });

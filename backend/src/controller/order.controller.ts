@@ -6,7 +6,8 @@ export const getAll = async (req: Request, res: Response) => {
   try {
     const patientUuid = req.query.patientUuid as string;
     const privileges = req.user?.privileges as string[] | undefined;
-    const results = await OrderService.getAll(patientUuid, privileges);
+    const locationId = req.locationId;
+    const results = await OrderService.getAll(patientUuid, privileges, locationId);
     res.status(200).json({ results });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
@@ -55,7 +56,9 @@ export const remove = async (req: Request, res: Response) => {
 
 export const pharmacyQueue = async (req: Request, res: Response) => {
   try {
-    const results = await OrderService.getPharmacyQueue();
+    const privileges = req.user?.privileges as string[] | undefined;
+    const locationId = req.locationId;
+    const results = await OrderService.getPharmacyQueue(privileges, locationId);
     const v = req.query.v as string || 'default';
     res.status(200).json({ results: RepresentationEngine.format(results, v) });
   } catch (error: any) {

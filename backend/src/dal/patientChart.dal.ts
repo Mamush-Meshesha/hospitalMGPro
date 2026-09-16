@@ -4,16 +4,33 @@ import * as crypto from 'crypto';
 import { prisma } from '../utils/prisma';
 
 export class PatientChartDAL {
-  static async getPatientVitals(patientId: number) {
+  static async getPatientVitals(patientId: number, privileges?: string[], authLocationId?: number) {
     // Concept IDs from Phase 4 Seed: 5085 (Sys), 5086 (Dia), 5087 (Pulse), 5088 (Temp), 5092 (SpO2)
     const vitalConcepts = [5085, 5086, 5087, 5088, 5092];
 
+    const where: any = {
+      person_id: patientId,
+      concept_id: { in: vitalConcepts },
+      voided: false
+    };
+
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && authLocationId) {
+        where.OR = [
+          { location_id: authLocationId },
+          { encounter_encounter_observations: { location_id: authLocationId } }
+        ];
+      }
+    } else if (authLocationId) {
+      where.OR = [
+        { location_id: authLocationId },
+        { encounter_encounter_observations: { location_id: authLocationId } }
+      ];
+    }
+
     return await prisma.obs.findMany({
-      where: {
-        person_id: patientId,
-        concept_id: { in: vitalConcepts },
-        voided: false
-      },
+      where,
       include: {
         concept_obs_concept: {
           include: {
@@ -101,12 +118,31 @@ export class PatientChartDAL {
     });
   }
 
-  static async getPatientOrders(patientId: number) {
+  static async getPatientOrders(patientId: number, privileges?: string[], authLocationId?: number) {
+    const where: any = {
+      patient_id: patientId,
+      voided: false
+    };
+
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && authLocationId) {
+        where.patient_order_for_patient = {
+          reverse_encounter_encounter_patient: {
+            some: { location_id: authLocationId }
+          }
+        };
+      }
+    } else if (authLocationId) {
+      where.patient_order_for_patient = {
+        reverse_encounter_encounter_patient: {
+          some: { location_id: authLocationId }
+        }
+      };
+    }
+
     return await prisma.orders.findMany({
-      where: {
-        patient_id: patientId,
-        voided: false
-      },
+      where,
       include: {
         order_type_type_of_order: true
       },
@@ -114,13 +150,13 @@ export class PatientChartDAL {
     });
   }
 
-  static async getFullPatientChart(patientId: number) {
+  static async getFullPatientChart(patientId: number, privileges?: string[], authLocationId?: number) {
     const [vitals, conditions, allergies, notes, orders, immunizations, patient] = await Promise.all([
-      this.getPatientVitals(patientId),
+      this.getPatientVitals(patientId, privileges, authLocationId),
       this.getPatientConditions(patientId),
       this.getPatientAllergies(patientId),
       this.getPatientNotes(patientId),
-      this.getPatientOrders(patientId),
+      this.getPatientOrders(patientId, privileges, authLocationId),
       ImmunizationDAL.getPatientImmunizations(patientId),
       prisma.patient.findFirst({
         where: { patient_id: patientId },

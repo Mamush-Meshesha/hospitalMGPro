@@ -1,8 +1,8 @@
 import { EncounterDAL, CreateEncounterInput } from '../dal/encounter.dal';
 
 export class EncounterService {
-  static async getAll(date?: string, locationId?: number, providerId?: number) {
-    return await EncounterDAL.getAll(date, locationId, providerId);
+  static async getAll(date?: string, queryLocationId?: number, providerId?: number, privileges?: string[], authLocationId?: number) {
+    return await EncounterDAL.getAll(date, queryLocationId, providerId, privileges, authLocationId);
   }
 
   static async getById(id: string) {
@@ -21,7 +21,7 @@ export class EncounterService {
     return await EncounterDAL.remove(id, voidedBy);
   }
 
-  static async getByPatient(patientUuid: string) {
-    return await EncounterDAL.getByPatient(patientUuid);
+  static async getByPatient(patientUuid: string, privileges?: string[], authLocationId?: number) {
+    return await EncounterDAL.getByPatient(patientUuid, privileges, authLocationId);
   }
 }

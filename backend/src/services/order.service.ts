@@ -3,8 +3,8 @@ import { BillingService } from './billing.service';
 import { prisma } from '../utils/prisma';
 
 export class OrderService {
-  static async getAll(patientUuid?: string, privileges?: string[]) {
-    return await OrderDAL.getAll(patientUuid, privileges);
+  static async getAll(patientUuid?: string, privileges?: string[], locationId?: number) {
+    return await OrderDAL.getAll(patientUuid, privileges, locationId);
   }
 
   static async getById(id: string) {
@@ -66,8 +66,8 @@ export class OrderService {
     return order;
   }
 
-  static async getPharmacyQueue() {
-    return await OrderDAL.getPharmacyQueue();
+  static async getPharmacyQueue(privileges?: string[], locationId?: number) {
+    return await OrderDAL.getPharmacyQueue(privileges, locationId);
   }
 
   static async dispense(orderUuid: string, quantity: number) {

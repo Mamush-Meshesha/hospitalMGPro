@@ -18,9 +18,26 @@ export interface CreateObsInput {
 }
 
 export class ObsDAL {
-  static async getAll() {
+  static async getAll(privileges?: string[], authLocationId?: number) {
+    const where: any = { voided: false };
+
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && authLocationId) {
+        where.OR = [
+          { location_id: authLocationId },
+          { encounter_encounter_observations: { location_id: authLocationId } }
+        ];
+      }
+    } else if (authLocationId) {
+      where.OR = [
+        { location_id: authLocationId },
+        { encounter_encounter_observations: { location_id: authLocationId } }
+      ];
+    }
+
     return await prisma.obs.findMany({
-      where: { voided: false },
+      where,
       include: {
         person_person_obs: {
           include: {
@@ -108,11 +125,29 @@ export class ObsDAL {
     });
   }
 
-  static async getByPerson(personUuid: string) {
+  static async getByPerson(personUuid: string, privileges?: string[], authLocationId?: number) {
     const person = await prisma.person.findFirst({ where: { uuid: personUuid } });
     if (!person) return [];
+
+    const where: any = { person_id: person.person_id, voided: false };
+
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && authLocationId) {
+        where.OR = [
+          { location_id: authLocationId },
+          { encounter_encounter_observations: { location_id: authLocationId } }
+        ];
+      }
+    } else if (authLocationId) {
+      where.OR = [
+        { location_id: authLocationId },
+        { encounter_encounter_observations: { location_id: authLocationId } }
+      ];
+    }
+
     return await prisma.obs.findMany({
-      where: { person_id: person.person_id, voided: false },
+      where,
       include: { concept_obs_concept: true, encounter_encounter_observations: true },
       orderBy: { obs_datetime: 'desc' },
       take: 50

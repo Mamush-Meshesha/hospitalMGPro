@@ -1,11 +1,11 @@
 import { ObsDAL } from '../dal/obs.dal';
 
 export class ObsService {
-  static async getAll(personUuid?: string) {
+  static async getAll(personUuid?: string, privileges?: string[], authLocationId?: number) {
     if (personUuid) {
-      return await ObsDAL.getByPerson(personUuid);
+      return await ObsDAL.getByPerson(personUuid, privileges, authLocationId);
     }
-    return await ObsDAL.getAll();
+    return await ObsDAL.getAll(privileges, authLocationId);
   }
 
   static async getById(id: string) {

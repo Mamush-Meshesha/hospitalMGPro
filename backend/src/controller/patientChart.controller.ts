@@ -7,7 +7,9 @@ export class PatientChartController {
       const patientId = parseInt(req.params.id);
       if (isNaN(patientId)) return res.status(400).json({ error: 'Invalid patient ID' });
       
-      const chart = await PatientChartDAL.getFullPatientChart(patientId);
+      const privileges = req.user?.privileges as string[] | undefined;
+      const authLocationId = req.locationId;
+      const chart = await PatientChartDAL.getFullPatientChart(patientId, privileges, authLocationId);
       return res.json(chart);
     } catch (error) {
       console.error(error);
@@ -17,7 +19,9 @@ export class PatientChartController {
 
   static async getVitals(req: Request, res: Response) {
     try {
-      const vitals = await PatientChartDAL.getPatientVitals(parseInt(req.params.id));
+      const privileges = req.user?.privileges as string[] | undefined;
+      const authLocationId = req.locationId;
+      const vitals = await PatientChartDAL.getPatientVitals(parseInt(req.params.id), privileges, authLocationId);
       return res.json({ results: vitals });
     } catch (error) {
       console.error(error);
@@ -75,7 +79,9 @@ export class PatientChartController {
 
   static async getOrders(req: Request, res: Response) {
     try {
-      const orders = await PatientChartDAL.getPatientOrders(parseInt(req.params.id));
+      const privileges = req.user?.privileges as string[] | undefined;
+      const authLocationId = req.locationId;
+      const orders = await PatientChartDAL.getPatientOrders(parseInt(req.params.id), privileges, authLocationId);
       return res.json({ results: orders });
     } catch (error) {
       console.error(error);

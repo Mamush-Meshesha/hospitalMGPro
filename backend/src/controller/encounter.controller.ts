@@ -14,9 +14,11 @@ const createEncounterSchema = z.object({
 
 export const getAll = async (req: Request, res: Response) => {
   try {
-    const date = req.query.date as string | undefined;
+    const queryLocationId = req.query.locationId ? Number(req.query.locationId) : undefined;
     const providerId = req.user?.providerId;
-    const results = await EncounterService.getAll(date, req.locationId, providerId);
+    const privileges = req.user?.privileges as string[] | undefined;
+    const authLocationId = req.locationId;
+    const results = await EncounterService.getAll(date, queryLocationId, providerId, privileges, authLocationId);
     const v = req.query.v as string || 'default';
     res.status(200).json({ results: RepresentationEngine.format(results, v) });
   } catch (error: any) {
@@ -73,7 +75,9 @@ export const remove = async (req: Request, res: Response) => {
 
 export const getByPatient = async (req: Request, res: Response) => {
   try {
-    const results = await EncounterService.getByPatient(req.params.patientUuid);
+    const privileges = req.user?.privileges as string[] | undefined;
+    const authLocationId = req.locationId;
+    const results = await EncounterService.getByPatient(req.params.patientUuid, privileges, authLocationId);
     res.status(200).json({ results });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

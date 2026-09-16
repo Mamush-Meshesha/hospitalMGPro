@@ -6,7 +6,7 @@ import { prisma } from '../utils/prisma';
 const generateUuid = () => crypto.randomUUID();
 
 export class OrderDAL {
-  static async getAll(patientUuid?: string, privileges?: string[]) {
+  static async getAll(patientUuid?: string, privileges?: string[], locationId?: number) {
     const where: any = {};
     if (patientUuid) {
       const patient = await prisma.patient.findFirst({ where: { person_person_id_for_patient: { uuid: patientUuid } } });
@@ -20,6 +20,16 @@ export class OrderDAL {
       const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
       
       if (!isAdmin) {
+        // Apply location filtering for non-admins
+        if (locationId) {
+          where.patient_order_for_patient = {
+            ...where.patient_order_for_patient,
+            reverse_encounter_encounter_patient: {
+              some: { location_id: locationId }
+            }
+          };
+        }
+
         const allowedTypes: string[] = [];
         // If they have VIEW_ORDERS, they see everything (General Doctor)
         if (!privileges.includes('VIEW_ORDERS')) {
@@ -36,6 +46,14 @@ export class OrderDAL {
           }
         }
       }
+    } else if (locationId) {
+      // If no privileges provided but locationId is, still enforce location
+      where.patient_order_for_patient = {
+        ...where.patient_order_for_patient,
+        reverse_encounter_encounter_patient: {
+          some: { location_id: locationId }
+        }
+      };
     }
     const orders = await prisma.orders.findMany({
       where,
@@ -226,16 +244,35 @@ export class OrderDAL {
   /**
    * Dedicated Pharmacy Dispensing Queue
    */
-  static async getPharmacyQueue() {
+  static async getPharmacyQueue(privileges?: string[], locationId?: number) {
+    const whereClause: any = {
+      voided: false,
+      date_stopped: null,
+      reverse_drug_order_extends_order: {
+        some: {} // Must have an attached drug order record
+      }
+    };
+
+    if (privileges) {
+      const isAdmin = privileges.includes('Super Admin') || privileges.includes('System Developer');
+      if (!isAdmin && locationId) {
+        whereClause.patient_order_for_patient = {
+          reverse_encounter_encounter_patient: {
+            some: { location_id: locationId }
+          }
+        };
+      }
+    } else if (locationId) {
+      whereClause.patient_order_for_patient = {
+        reverse_encounter_encounter_patient: {
+          some: { location_id: locationId }
+        }
+      };
+    }
+
     // Fetch all orders that are Drug Orders (order_type_id = 1) and not voided/stopped
     const orders = await prisma.orders.findMany({
-      where: {
-        voided: false,
-        date_stopped: null,
-        reverse_drug_order_extends_order: {
-          some: {} // Must have an attached drug order record
-        }
-      },
+      where: whereClause,
       include: {
         reverse_drug_order_extends_order: {
           include: { drug_inventory_item: true }
