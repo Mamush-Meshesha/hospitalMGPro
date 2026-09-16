@@ -2,6 +2,7 @@ import "reflect-metadata";
 import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import helmet from "helmet";
+import { createProxyMiddleware } from "http-proxy-middleware";
 
 import router from "./api/index";
 
@@ -31,10 +32,20 @@ app.options("*", cors());
 app.use(helmet()); 
 app.use(helmet.hidePoweredBy()); 
 
+// ERP Proxy setup
+const ERP_SERVER = process.env.ERP_REST_SERVER || 'http://localhost:4000';
+const erpRoutes = ['/categories', '/products', '/warehouses', '/suppliers', '/po', '/invoices', '/movements', '/stock'];
+erpRoutes.forEach(route => {
+  app.use(`/api/v1${route}`, createProxyMiddleware({
+    target: ERP_SERVER,
+    changeOrigin: true,
+  }));
+});
+
 app.use(express.json({ limit: "5mb" }));
 app.use(express.urlencoded({ limit: "5mb", extended: true }));
 
-// API routes
+// EMR API routes
 app.use('/api/v1', router);
 
 // Health check
