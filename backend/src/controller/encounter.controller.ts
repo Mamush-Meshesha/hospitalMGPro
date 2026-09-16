@@ -14,6 +14,7 @@ const createEncounterSchema = z.object({
 
 export const getAll = async (req: Request, res: Response) => {
   try {
+    const date = req.query.date as string | undefined;
     const queryLocationId = req.query.locationId ? Number(req.query.locationId) : undefined;
     const providerId = req.user?.providerId;
     const privileges = req.user?.privileges as string[] | undefined;
