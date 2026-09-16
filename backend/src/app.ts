@@ -34,12 +34,31 @@ app.use(helmet.hidePoweredBy());
 
 // ERP Proxy setup
 const ERP_SERVER = process.env.ERP_REST_SERVER || 'http://localhost:4000';
-const erpRoutes = ['/categories', '/products', '/warehouses', '/suppliers', '/po', '/invoices', '/movements', '/stock'];
-erpRoutes.forEach(route => {
-  app.use(`/api/v1${route}`, createProxyMiddleware({
-    target: ERP_SERVER,
-    changeOrigin: true,
-  }));
+const erpRoutePrefixes = [
+  '/api/v1/categories', 
+  '/api/v1/products', 
+  '/api/v1/warehouses', 
+  '/api/v1/suppliers', 
+  '/api/v1/po', 
+  '/api/v1/invoices', 
+  '/api/v1/movements', 
+  '/api/v1/stock',
+  '/erp-health'
+];
+
+const erpProxy = createProxyMiddleware({
+  target: ERP_SERVER,
+  changeOrigin: true,
+  pathRewrite: {
+    '^/erp-health': '/api/v1/health'
+  }
+});
+
+app.use((req, res, next) => {
+  if (erpRoutePrefixes.some(route => req.originalUrl.startsWith(route))) {
+    return erpProxy(req, res, next);
+  }
+  next();
 });
 
 app.use(express.json({ limit: "5mb" }));
